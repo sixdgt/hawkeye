@@ -1,0 +1,1 @@
+This is a prototype or proof of concept to anaylise github public repository of students' assignments.
