@@ -12,10 +12,13 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 import os
+from decouple import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Auth model
+AUTH_USER_MODEL = 'core.User'
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
@@ -43,9 +46,42 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'core',
     'rest_framework',
+    'rest_framework.authtoken',
+    'core',
 ]
+# ... other settings ...
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+}
+
+# Add this for CORS if your frontend is on a different domain/port
+CORS_ALLOW_ALL_ORIGINS = True # For development, be more specific in production
+CORS_ALLOW_HEADERS = [
+    "accept",
+    "accept-encoding",
+    "authorization",
+    "content-type",
+    "dnt",
+    "origin",
+    "user-agent",
+    "x-csrftoken",
+    "x-requested-with",
+]
+
+# GitHub Personal Access Token for the teacher/reviewer account
+# This token should have 'repo' scope to access private repositories if needed.
+# For public repos, it might not be strictly necessary, but good for consistent access.
+# **IMPORTANT**: Use environment variables for this in production!
+
+GITHUB_PAT = config('GITHUB_PAT')
+if not GITHUB_PAT:
+    raise ValueError("GITHUB_PAT environment variable not set")
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
