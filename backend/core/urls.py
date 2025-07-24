@@ -9,10 +9,12 @@ from core.views import (
     SubmissionListCreateView,
     SubmissionDetailView,
     CodeReviewView,
+    GithubLogin,
 )
 
 urlpatterns = [
-    path('login/', CustomAuthToken.as_view(), name='api_login'),
+    path('auth/github/', GithubLogin.as_view(), name='github_login'),
+    # path('login/', CustomAuthToken.as_view(), name='api_login'),
     path('register/student/', RegisterStudentView.as_view(), name='register_student'),
     path('register/teacher/', RegisterTeacherView.as_view(), name='register_teacher'),
 
