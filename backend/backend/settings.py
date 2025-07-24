@@ -47,9 +47,21 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'social_django',
     'rest_framework.authtoken',
     'core',
 ]
+
+AUTHENTICATION_BACKENDS = (
+    'social_core.backends.github.GithubOAuth2',  # GitHub OAuth backend
+    'django.contrib.auth.backends.ModelBackend',
+)
+
+SOCIAL_AUTH_GITHUB_KEY = config('SOCIAL_AUTH_GITHUB_KEY') # client ID
+SOCIAL_AUTH_GITHUB_SECRET = config('SOCIAL_AUTH_GITHUB_SECRET')  # client secret
+
+SOCIAL_AUTH_LOGIN_REDIRECT_URL = '/'
+
 # ... other settings ...
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
@@ -91,7 +103,12 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'social_django.middleware.SocialAuthExceptionMiddleware',
 ]
+
+# Add social-auth urls namespace
+from django.urls import reverse_lazy
+SOCIAL_AUTH_REDIRECT_IS_HTTPS = True  # if you're using HTTPS
 
 ROOT_URLCONF = 'backend.urls'
 

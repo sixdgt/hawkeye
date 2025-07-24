@@ -20,5 +20,5 @@ from django.urls import path, include
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('core.urls')),  # Include URLs from the core app
-    path('api-auth/', include('rest_framework.urls')),  # Include DRF authentication URLs
+    path('auth/', include('social_django.urls', namespace='social')),
 ]

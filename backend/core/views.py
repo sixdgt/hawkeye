@@ -13,10 +13,37 @@ import base64
 import re
 from core.models import User, Assignment, Submission
 from core.serializers import UserSerializer, RegisterTeacherSerializer, RegisterStudentSerializer, AssignmentSerializer, SubmissionSerializer
+from social_django.utils import load_strategy, load_backend
+from social_core.exceptions import AuthException
+from rest_framework_simpljejwt.token import RefreshToken
 
 User = get_user_model()
 
 # Create your views here.
+class GithubLogin(APIView):
+    def post(self, request):
+        access_token = request.data.get('access_token')
+        if not access_token:
+            return Response({'error': 'Access token is required'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            strategy = load_strategy(request)
+            backend = load_backend(strategy=strategy, name='github', redirect_uri=None)
+            user = backend.do_auth(access_token)
+        except MissingBackend:
+            return Response({'error': 'Invalid backend'}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        
+        if user and user.is_active:
+            refresh = RefreshToken.for_user(user)
+            return Response({
+                'refresh': str(refresh),
+                'access': str(refresh.access_token),
+            })
+        else:
+            return Response({'error': 'Authentication failed'}, status=status.HTTP_400_BAD_REQUEST)
+
 class IsTeacher(permissions.BasePermission):
     """
     Custom permission to only allow teachers to access certain views.
