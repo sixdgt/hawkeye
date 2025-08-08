@@ -33,40 +33,88 @@ ALLOWED_HOSTS = [
    '192.168.1.134:8001',
    '192.168.1.134',
     'localhost',
-    '127.0.0.1'
+    'localhost:5173',
+    '127.0.0.1',
+    "http://192.168.1.134:5173",
 ]
 
 
 # Application definition
 
 INSTALLED_APPS = [
+    # Default apps
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sites',
+
+    # core app
+    'core',
+
+    # Third-party
     'rest_framework',
     'social_django',
-    'rest_framework.authtoken',
-    'core',
+    'corsheaders',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.github',
+    'dj_rest_auth',
+    'dj_rest_auth.registration',
+    'rest_framework.authtoken'
 ]
 
+SITE_ID = 1
+
+REST_USE_JWT = True
+
+REST_AUTH = {
+    'USE_JWT': True,
+    # Replace deprecated settings
+    'SIGNUP_FIELDS': {
+        'username': {'required': True},
+        'email': {'required': True},
+        # Add others if needed
+        # 'first_name': {'required': False},
+        # 'last_name': {'required': False},
+    }
+}
+
+
 AUTHENTICATION_BACKENDS = (
-    'social_core.backends.github.GithubOAuth2',  # GitHub OAuth backend
     'django.contrib.auth.backends.ModelBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
+    'social_core.backends.github.GithubOAuth2',
 )
 
-SOCIAL_AUTH_GITHUB_KEY = config('SOCIAL_AUTH_GITHUB_KEY') # client ID
-SOCIAL_AUTH_GITHUB_SECRET = config('SOCIAL_AUTH_GITHUB_SECRET')  # client secret
+LOGIN_REDIRECT_URL = '"http://192.168.1.134:5173/",'
 
-SOCIAL_AUTH_LOGIN_REDIRECT_URL = '/'
+ACCOUNT_LOGOUT_REDIRECT_URL = '"http://192.168.1.134:5173/",'
+
+# SOCIALACCOUNT_PROVIDERS = {
+#     'github': {
+#         'APP': {
+#             'client_id': config('GITHUB_CLIENT_ID'),
+#             'secret': config('GITHUB_CLIENT_SECRET'),
+#         }
+#     }
+# }
+
+# GitHub OAuth settings
+SOCIAL_AUTH_GITHUB_KEY = config('GITHUB_CLIENT_ID')
+SOCIAL_AUTH_GITHUB_SECRET = config('GITHUB_CLIENT_SECRET')
+SOCIAL_AUTH_GITHUB_SCOPE = ['user:email']  # Request email access
+
+SOCIAL_AUTH_LOGIN_REDIRECT_URL = 'http://localhost:5173/login'
 
 # ... other settings ...
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.TokenAuthentication',
-    ],
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
     ],
@@ -86,6 +134,10 @@ CORS_ALLOW_HEADERS = [
     "x-requested-with",
 ]
 
+CORS_ALLOWED_ORIGINS = [
+    "http://192.168.1.134:5173",  # React app running via Vite
+]
+
 # GitHub Personal Access Token for the teacher/reviewer account
 # This token should have 'repo' scope to access private repositories if needed.
 # For public repos, it might not be strictly necessary, but good for consistent access.
@@ -96,6 +148,7 @@ if not GITHUB_PAT:
     raise ValueError("GITHUB_PAT environment variable not set")
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -104,6 +157,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'social_django.middleware.SocialAuthExceptionMiddleware',
+    'allauth.account.middleware.AccountMiddleware'
 ]
 
 # Add social-auth urls namespace

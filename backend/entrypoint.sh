@@ -1,19 +1,15 @@
-#!/bin/sh
+#!/bin/bash
 
 # Wait for PostgreSQL to be ready
-echo "Waiting for PostgreSQL..."
-while ! nc -z db 5432; do
-  sleep 1
+until nc -z $POSTGRES_HOST $POSTGRES_PORT; do
+  echo "Waiting for PostgreSQL at $POSTGRES_HOST:$POSTGRES_PORT..."
+  sleep 2
 done
-echo "PostgreSQL is up - continuing..."
+
+echo "PostgreSQL is up - executing command"
 
 # Run migrations
-echo "Running migrations..."
 python manage.py migrate
 
-# Collect static files (optional)
-# echo "Collecting static files..."
-# python manage.py collectstatic --noinput
-
-# Run the command passed to the container
+# Execute the command passed to the entrypoint (e.g., runserver)
 exec "$@"

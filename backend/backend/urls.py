@@ -19,6 +19,9 @@ from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/', include('core.urls')),  # Include URLs from the core app
-    path('auth/', include('social_django.urls', namespace='social')),
+    path('api/', include('core.urls')),
+
+    path('auth/', include('dj_rest_auth.urls')),            # login/logout/password reset
+    path('auth/registration/', include('dj_rest_auth.registration.urls')),  # registration
+    path('auth/', include('allauth.urls')), 
 ]

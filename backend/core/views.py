@@ -15,7 +15,7 @@ from core.models import User, Assignment, Submission
 from core.serializers import UserSerializer, RegisterTeacherSerializer, RegisterStudentSerializer, AssignmentSerializer, SubmissionSerializer
 from social_django.utils import load_strategy, load_backend
 from social_core.exceptions import AuthException
-from rest_framework_simpljejwt.token import RefreshToken
+from rest_framework_simplejwt.tokens import RefreshToken
 
 User = get_user_model()
 
