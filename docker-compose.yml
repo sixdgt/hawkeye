@@ -1,0 +1,53 @@
+services:
+  backend:
+    build:
+      context: ./backend
+    command: python manage.py runserver 0.0.0.0:8001
+    volumes:
+      - ./backend:/app
+    ports:
+      - "8001:8001"
+    depends_on:
+      - db
+    environment:
+      DJANGO_SETTINGS_MODULE: backend.settings
+      POSTGRES_NAME: hawkeye
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: hawkeye
+      POSTGRES_HOST: db
+      POSTGRES_PORT: 5432
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        USER_ID: 1000  # Replace with your host UID (run `id -u`)
+        GROUP_ID: 1000 # Replace with your host GID (run `id -g`)
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules # Exclude node_modules to avoid permissions issues
+    ports:
+      - "5173:5173" # Expose port 5173
+    command: npm run dev
+    depends_on:
+      - backend
+    env_file:
+      - ./frontend/.env
+    environment:
+      - VITE_API_URL=http://backend:8001 # For React API calls to Django
+      - VITE_GITHUB_CLIENT_ID=Ov23lirh0gGRnjHldeQo
+
+  db:
+    image: postgres:17.5-alpine3.22
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      POSTGRES_DB: hawkeye
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: hawkeye
+    ports:
+      - "5433:5432" # Map host port 5433 to container port 5432
+      - "5434:5432" # Additional port for PostgreSQL
+
+volumes:
+  postgres_data:
